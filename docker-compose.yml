@@ -19,7 +19,7 @@ services:
     depends_on:
       - redis
     # Security: Bind gateway to all interfaces (0.0.0.0) for external access
-    command: ["openclaw", "gateway", "--bind", "0.0.0.0", "--port", "18789"]
+    command: ["openclaw", "gateway", "--bind", "lan", "--port", "18789", "--allow-unconfigured"]
 
   redis:
     image: redis:7-alpine
