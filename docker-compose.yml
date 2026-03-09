@@ -1,0 +1,52 @@
+version: "3.8"
+
+services:
+  openclaw-gateway:
+    build: 
+      context: ./source
+      dockerfile: Dockerfile
+    container_name: openclaw-gateway
+    restart: always
+    network_mode: host # For better performance and network access
+    environment:
+      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
+      - OPENCLAW_CONFIG_DIR=/home/node/.openclaw
+      - OPENCLAW_WORKSPACE_DIR=/home/node/.openclaw/workspace
+      - NODE_ENV=production
+    volumes:
+      - ./config:/home/node/.openclaw
+      - ./workspace:/home/node/.openclaw/workspace
+    depends_on:
+      - redis
+    # Security: Bind gateway to all interfaces (0.0.0.0) for external access
+    command: ["openclaw", "gateway", "--bind", "0.0.0.0", "--port", "18789"]
+
+  redis:
+    image: redis:7-alpine
+    container_name: openclaw-redis
+    restart: always
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - ./redis_data:/data
+    ports:
+      - "127.0.0.1:6379:6379"
+
+  arbitrage-monitor:
+    build: 
+      context: .
+      dockerfile: Dockerfile.monitor
+    container_name: arbitrage-monitor
+    restart: always
+    environment:
+      - OPENCLAW_GATEWAY_URL=ws://127.0.0.1:18789
+      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
+      - CHECK_INTERVAL=10
+      - THRESHOLD_PERCENT=0.5
+      - TARGET_PAIRS=BTC/USDT,ETH/USDT
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - WEBHOOK_URL= # Fill this with your Feishu/DingTalk Webhook URL
+    depends_on:
+      - openclaw-gateway
+    network_mode: host

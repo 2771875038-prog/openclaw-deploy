@@ -1,0 +1,12 @@
+{
+  "gateway": {
+    "key": "AIzaSyCwjn8Tey4fxeNzmHNzKA9WF4vH6ixBIcA"
+  },
+  "channels": {
+    "telegram": {
+      "bot_token": "8605005604:AAEpeE6N8fIruOBPRN842rO9YGMcMK48Utg",
+      "chat_id": "8363729701",
+      "enabled": true
+    }
+  }
+}
